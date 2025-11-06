@@ -5,40 +5,90 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Camelia • Simple Dictionary</title>
 
-  <!-- Tailwind (utility CSS) -->
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- Meta (optional but nice for SEO/share) -->
-  <meta name="description" content="A fast, minimalist dictionary app with search, definitions, phonetics, audio, and synonyms." />
-  <meta property="og:title" content="Simple Dictionary" />
-  <meta property="og:description" content="Look up word meanings with phonetics, audio, and synonyms." />
-  <meta property="og:type" content="website" />
+  <!-- SEO Meta -->
+  <meta name="description" content="A fast, minimalist dictionary app that displays word definitions, phonetics, audio pronunciation, and synonyms — created by Camelia Simion." />
+  <link rel="canonical" href="https://your-dictionary-site.netlify.app/" />
 
+  <!-- Open Graph -->
+  <meta property="og:title" content="Camelia • Simple Dictionary" />
+  <meta property="og:description" content="Search words for quick definitions, audio pronunciation, and synonyms." />
+  <meta property="og:url" content="https://dictionarycs.netlify.app/" />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://your-dictionary-site.netlify.app/images/dictionary-preview.png" />
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Camelia • Simple Dictionary" />
+  <meta name="twitter:description" content="A responsive dictionary web app with phonetics, audio, and synonyms." />
+  <meta name="twitter:image" content="https://your-dictionary-site.netlify.app/images/dictionary-preview.png" />
+
+  <!-- Favicon -->
+  <link rel="icon" href="/images/Snapchat-2205782.png" type="image/png" />
+
+  <!-- Styles -->
   <style>
-    :root { --brand:#6b46c1; --brand-2:#7c3aed; }
-    .brand-gradient{ background: linear-gradient(135deg, var(--brand), var(--brand-2)); }
-    .soft-shadow{ box-shadow: 0 12px 28px rgba(17,24,39,.12); }
+    :root {
+      --brand: #6b46c1;
+      --brand-2: #7c3aed;
+      --accent: #22c55e;
+    }
+    .brand-gradient {
+      background: linear-gradient(135deg, var(--brand), var(--brand-2));
+    }
+    .soft-shadow {
+      box-shadow: 0 12px 28px rgba(17, 24, 39, 0.12);
+    }
   </style>
+
+  <!-- JSON-LD Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"WebSite",
+    "name":"Camelia • Simple Dictionary",
+    "url":"https://your-dictionary-site.netlify.app/",
+    "creator":{
+      "@type":"Person",
+      "name":"Camelia Simion",
+      "jobTitle":"Technical Support Engineer II"
+    },
+    "about":"Dictionary app with definitions, phonetics, and synonyms.",
+    "mainEntity":{
+      "@type":"SoftwareApplication",
+      "name":"Simple Dictionary",
+      "applicationCategory":"EducationalApplication",
+      "operatingSystem":"All"
+    }
+  }
+  </script>
 </head>
 <body class="bg-gray-50 text-gray-800 min-h-screen flex flex-col">
 
-  <!-- NAV / HERO -->
+  <!-- HERO / NAV -->
   <header class="brand-gradient text-white">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
       <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight">Simple Dictionary</h1>
-      <p class="mt-2 text-white/90">Search English words for quick definitions, phonetics, audio, examples, and synonyms.</p>
+      <p class="mt-2 text-white/90 max-w-2xl">Search any English word for definitions, phonetics, audio, and synonyms — designed and built by Camelia Simion.</p>
 
-      <!-- Search Bar -->
+      <!-- Search -->
       <form id="searchForm" class="mt-6">
         <div class="bg-white rounded-2xl p-2 flex items-center gap-2 soft-shadow">
-          <input id="query" class="flex-1 px-4 py-3 rounded-xl outline-none"
-                 type="search" placeholder="Search a word (e.g., serendipity)" required />
-          <button class="px-4 py-3 rounded-xl text-white font-medium"
-                  style="background:#22c55e">Search</button>
+          <input id="query"
+                 type="search"
+                 placeholder="Search a word (e.g., serendipity)"
+                 class="flex-1 px-4 py-3 rounded-xl outline-none bg-white text-gray-900 placeholder:text-gray-500
+                        focus:ring-2 focus:ring-emerald-400"
+                 autocapitalize="off" autocorrect="off" spellcheck="false" required />
+          <button type="submit"
+                  class="px-4 py-3 rounded-xl text-white font-medium"
+                  style="background: var(--accent)">Search</button>
         </div>
       </form>
 
-      <!-- Quick suggestions -->
+      <!-- Quick Suggestions -->
       <div class="mt-3 text-sm flex flex-wrap gap-2">
         <span class="opacity-80">Try:</span>
         <button class="suggest px-2 py-1 rounded-lg bg-white/10 hover:bg-white/20">sunset</button>
@@ -52,12 +102,10 @@
   <!-- RESULTS -->
   <main class="flex-1">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <!-- STATUS / ERRORS -->
       <div id="status" class="hidden rounded-xl border bg-white p-4 soft-shadow"></div>
 
-      <!-- Card -->
+      <!-- Result Card -->
       <article id="card" class="mt-6 bg-white rounded-2xl border soft-shadow overflow-hidden hidden">
-        <!-- Header -->
         <div class="p-5 border-b">
           <div class="flex items-start justify-between gap-3">
             <div>
@@ -65,12 +113,12 @@
               <div id="phonetic" class="text-gray-600"></div>
             </div>
             <button id="playBtn"
-              class="px-3 py-2 rounded-lg border text-sm hidden hover:bg-gray-50"
-              title="Play pronunciation">🔊 Play</button>
+                    class="px-3 py-2 rounded-lg border text-sm hidden hover:bg-gray-50"
+                    title="Play pronunciation">🔊 Play</button>
           </div>
         </div>
 
-        <!-- Meanings -->
+        <!-- Definitions -->
         <div id="meanings" class="p-5 space-y-6"></div>
 
         <!-- Synonyms -->
@@ -86,16 +134,16 @@
   <footer class="border-t">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 text-sm flex flex-col sm:flex-row items-center gap-3 justify-between">
       <p>© <span id="year"></span> Simple Dictionary</p>
-      <p class="text-gray-600">
-        ✌️ Built by Camelia Simion — open-sourced on
-        <a class="underline text-indigo-600" href="https://github.com/simcamelia/ResponsiveHW" target="_blank" rel="noopener">GitHub</a>.
-        Hosted on <a class="underline text-indigo-600" href="#" id="netlifyLink">Netlify</a>
+      <p class="text-gray-600 flex items-center gap-1">
+        🌈 This website was coded by <strong>Camelia Simion</strong>, and is
+        <a href="https://github.com/simcamelia/dictionary/" target="_blank" rel="noopener" class="underline text-indigo-600">open-sourced</a>,
+        hosted on <a href="https://dictionarycs.netlify.app/" target="_blank" rel="noopener" class="underline text-indigo-600">Netlify</a>.
       </p>
     </div>
   </footer>
 
+  <!-- JS Logic -->
   <script>
-    // Utilities
     const $ = (q) => document.querySelector(q);
     const statusEl = $('#status');
     const cardEl = $('#card');
@@ -105,11 +153,7 @@
     const synonymsWrapEl = $('#synonymsWrap');
     const synonymsEl = $('#synonyms');
     const playBtn = $('#playBtn');
-    const netlifyLink = $('#netlifyLink');
     document.getElementById('year').textContent = new Date().getFullYear();
-
-    // Set this to your final Netlify URL after deploy
-    netlifyLink.href = 'https://YOUR-NETLIFY-SITE.netlify.app/';
 
     let audioUrl = null;
 
@@ -124,18 +168,15 @@
     function clearStatus(){ statusEl.classList.add('hidden'); statusEl.textContent=''; }
 
     function renderDefinitions(entry){
-      // Word + phonetics
       wordEl.textContent = entry.word || '';
       const phon = (entry.phonetic || (entry.phonetics||[]).find(p=>p.text)?.text || '').trim();
       phoneticEl.textContent = phon;
 
-      // Audio
       audioUrl = null;
       const phonAudio = (entry.phonetics || []).find(p => p.audio && p.audio.trim().length > 0);
       if (phonAudio) { audioUrl = phonAudio.audio; playBtn.classList.remove('hidden'); }
       else { playBtn.classList.add('hidden'); }
 
-      // Meanings
       meaningsEl.innerHTML = '';
       (entry.meanings || []).forEach(m => {
         const box = document.createElement('section');
@@ -152,7 +193,6 @@
         meaningsEl.appendChild(box);
       });
 
-      // Synonyms (aggregate)
       const synSet = new Set();
       (entry.meanings || []).forEach(m => (m.synonyms || []).forEach(s => synSet.add(s)));
       synonymsEl.innerHTML = '';
@@ -191,14 +231,12 @@
         clearStatus();
         renderDefinitions(entry);
         cardEl.classList.remove('hidden');
-        // Scroll to results on small screens
         cardEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
       } catch (e) {
-        showStatus('Something went wrong. Check your connection and try again.', 'error');
+        showStatus('Something went wrong. Please try again.', 'error');
       }
     }
 
-    // Events
     document.getElementById('searchForm').addEventListener('submit', (e) => {
       e.preventDefault();
       search();
@@ -212,7 +250,6 @@
       a.play().catch(()=>{});
     });
 
-    // Default lookup
     window.addEventListener('DOMContentLoaded', () => {
       const q = new URLSearchParams(location.search).get('q');
       if (q) { $('#query').value = q; search(); }
