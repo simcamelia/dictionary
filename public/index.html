@@ -1,10 +1,15 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Camelia • Simple Dictionary</title>
 
+  <!-- Tailwind config (enable class-based dark mode) -->
+  <script>
+    window.tailwind = window.tailwind || {};
+    tailwind.config = { darkMode: 'class' };
+  </script>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
 
@@ -64,23 +69,48 @@
     }
   }
   </script>
+
+  <!-- Theme boot: apply saved/system theme BEFORE paint -->
+  <script>
+    (function initTheme(){
+      const root = document.documentElement;
+      const saved = localStorage.getItem('theme'); // 'dark' | 'light' | null
+      if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        root.classList.add('dark');
+      } else {
+        root.classList.remove('dark');
+      }
+    })();
+  </script>
 </head>
-<body class="bg-gray-50 text-gray-800 min-h-screen flex flex-col">
+<body class="bg-gray-50 text-gray-800 min-h-screen flex flex-col dark:bg-gray-950 dark:text-gray-100">
 
   <!-- HERO / NAV -->
   <header class="brand-gradient text-white">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-      <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight">Simple Dictionary</h1>
-      <p class="mt-2 text-white/90 max-w-2xl">Search any English word for definitions, phonetics, audio, and synonyms — designed and built by Camelia Simion.</p>
+      <div class="flex items-center justify-between">
+        <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight">Simple Dictionary</h1>
+
+        <!-- Theme toggle -->
+        <button id="themeToggle"
+          class="rounded-xl px-3 py-2 bg-white/10 hover:bg-white/20 border border-white/20 text-sm"
+          title="Toggle dark mode" aria-label="Toggle dark mode">
+          <span id="themeIcon">🌙</span>
+        </button>
+      </div>
+
+      <p class="mt-2 text-white/90 max-w-2xl">
+        Search any English word for definitions, phonetics, audio, and synonyms — designed and built by Camelia Simion.
+      </p>
 
       <!-- Search -->
       <form id="searchForm" class="mt-6">
-        <div class="bg-white rounded-2xl p-2 flex items-center gap-2 soft-shadow">
+        <div class="bg-white rounded-2xl p-2 flex items-center gap-2 soft-shadow dark:bg-gray-900">
           <input id="query"
                  type="search"
                  placeholder="Search a word (e.g., serendipity)"
                  class="flex-1 px-4 py-3 rounded-xl outline-none bg-white text-gray-900 placeholder:text-gray-500
-                        focus:ring-2 focus:ring-emerald-400"
+                        focus:ring-2 focus:ring-emerald-400 dark:bg-gray-900 dark:text-gray-100 dark:placeholder:text-gray-400"
                  autocapitalize="off" autocorrect="off" spellcheck="false" required />
           <button type="submit"
                   class="px-4 py-3 rounded-xl text-white font-medium"
@@ -90,7 +120,7 @@
 
       <!-- Quick Suggestions -->
       <div class="mt-3 text-sm flex flex-wrap gap-2">
-        <span class="opacity-80">Try:</span>
+        <span class="opacity-90">Try:</span>
         <button class="suggest px-2 py-1 rounded-lg bg-white/10 hover:bg-white/20">sunset</button>
         <button class="suggest px-2 py-1 rounded-lg bg-white/10 hover:bg-white/20">ephemeral</button>
         <button class="suggest px-2 py-1 rounded-lg bg-white/10 hover:bg-white/20">resilience</button>
@@ -102,18 +132,20 @@
   <!-- RESULTS -->
   <main class="flex-1">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div id="status" class="hidden rounded-xl border bg-white p-4 soft-shadow"></div>
+      <div id="status" class="hidden rounded-xl border bg-white p-4 soft-shadow
+                             dark:bg-gray-900 dark:border-gray-800"></div>
 
       <!-- Result Card -->
-      <article id="card" class="mt-6 bg-white rounded-2xl border soft-shadow overflow-hidden hidden">
-        <div class="p-5 border-b">
+      <article id="card" class="mt-6 bg-white rounded-2xl border soft-shadow overflow-hidden hidden
+                                dark:bg-gray-900 dark:border-gray-800">
+        <div class="p-5 border-b dark:border-gray-800">
           <div class="flex items-start justify-between gap-3">
             <div>
               <h2 id="word" class="text-2xl font-bold"></h2>
-              <div id="phonetic" class="text-gray-600"></div>
+              <div id="phonetic" class="text-gray-600 dark:text-gray-300"></div>
             </div>
             <button id="playBtn"
-                    class="px-3 py-2 rounded-lg border text-sm hidden hover:bg-gray-50"
+                    class="px-3 py-2 rounded-lg border text-sm hidden hover:bg-gray-50 dark:hover:bg-gray-800 dark:border-gray-700"
                     title="Play pronunciation">🔊 Play</button>
           </div>
         </div>
@@ -131,13 +163,13 @@
   </main>
 
   <!-- FOOTER -->
-  <footer class="border-t">
+  <footer class="border-t dark:border-gray-800">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 text-sm flex flex-col sm:flex-row items-center gap-3 justify-between">
       <p>© <span id="year"></span> Simple Dictionary</p>
-      <p class="text-gray-600 flex items-center gap-1">
+      <p class="text-gray-700 dark:text-gray-300 flex items-center gap-1">
         🌈 This website was coded by <strong>Camelia Simion</strong>, and is
-        <a href="https://github.com/simcamelia/dictionary/" target="_blank" rel="noopener" class="underline text-indigo-600">open-sourced</a>,
-        hosted on <a href="https://dictionarycs.netlify.app/" target="_blank" rel="noopener" class="underline text-indigo-600">Netlify</a>.
+        <a href="https://github.com/simcamelia/dictionary/" target="_blank" rel="noopener" class="underline text-indigo-600 dark:text-indigo-400">open-sourced</a>,
+        hosted on <a href="https://dictionarycs.netlify.app/" target="_blank" rel="noopener" class="underline text-indigo-600 dark:text-indigo-400">Netlify</a>.
       </p>
     </div>
   </footer>
@@ -153,16 +185,38 @@
     const synonymsWrapEl = $('#synonymsWrap');
     const synonymsEl = $('#synonyms');
     const playBtn = $('#playBtn');
+    const themeBtn = $('#themeToggle');
+    const themeIcon = $('#themeIcon');
     document.getElementById('year').textContent = new Date().getFullYear();
+
+    // Theme toggling + persistence
+    function setTheme(mode){ // 'dark' | 'light'
+      const root = document.documentElement;
+      if (mode === 'dark') root.classList.add('dark');
+      else root.classList.remove('dark');
+      localStorage.setItem('theme', mode);
+      themeIcon.textContent = mode === 'dark' ? '☀️' : '🌙';
+      themeBtn.title = mode === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
+    }
+    // Initialize current icon
+    setTheme(document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+    themeBtn.addEventListener('click', () => {
+      const isDark = document.documentElement.classList.contains('dark');
+      setTheme(isDark ? 'light' : 'dark');
+    });
 
     let audioUrl = null;
 
     function showStatus(msg, type='info') {
       statusEl.classList.remove('hidden');
-      statusEl.className = 'rounded-xl border bg-white p-4 soft-shadow';
-      if (type === 'error') statusEl.classList.add('border-rose-300', 'bg-rose-50');
-      else if (type === 'loading') statusEl.classList.add('border-indigo-300', 'bg-indigo-50');
-      else statusEl.classList.add('border-emerald-300', 'bg-emerald-50');
+      statusEl.className = 'rounded-xl border bg-white p-4 soft-shadow dark:bg-gray-900 dark:border-gray-800';
+      if (type === 'error') {
+        statusEl.classList.add('border-rose-300', 'bg-rose-50', 'dark:bg-rose-950/30', 'dark:border-rose-900');
+      } else if (type === 'loading') {
+        statusEl.classList.add('border-indigo-300', 'bg-indigo-50', 'dark:bg-indigo-950/30', 'dark:border-indigo-900');
+      } else {
+        statusEl.classList.add('border-emerald-300', 'bg-emerald-50', 'dark:bg-emerald-950/30', 'dark:border-emerald-900');
+      }
       statusEl.textContent = msg;
     }
     function clearStatus(){ statusEl.classList.add('hidden'); statusEl.textContent=''; }
@@ -180,15 +234,15 @@
       meaningsEl.innerHTML = '';
       (entry.meanings || []).forEach(m => {
         const box = document.createElement('section');
-        box.className = 'border rounded-xl p-4';
-        const pos = m.partOfSpeech ? `<span class="text-xs px-2 py-0.5 rounded-full bg-gray-100 border">${m.partOfSpeech}</span>` : '';
+        box.className = 'border rounded-xl p-4 dark:border-gray-800';
+        const pos = m.partOfSpeech ? `<span class="text-xs px-2 py-0.5 rounded-full bg-gray-100 border dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200">${m.partOfSpeech}</span>` : '';
         const defs = (m.definitions || []).slice(0,5).map(d => {
-          const ex = d.example ? `<div class="text-gray-600 mt-1">💡 <em>${escapeHtml(d.example)}</em></div>` : '';
+          const ex = d.example ? `<div class="text-gray-600 dark:text-gray-300 mt-1">💡 <em>${escapeHtml(d.example)}</em></div>` : '';
           return `<li class="mb-2 leading-relaxed"><span class="font-medium">${escapeHtml(d.definition)}</span>${ex}</li>`;
         }).join('');
         box.innerHTML = `
           <div class="flex items-center justify-between mb-2">${pos}</div>
-          <ol class="list-decimal pl-5">${defs || '<li class="text-gray-600">No definitions provided.</li>'}</ol>
+          <ol class="list-decimal pl-5">${defs || '<li class="text-gray-600 dark:text-gray-300">No definitions provided.</li>'}</ol>
         `;
         meaningsEl.appendChild(box);
       });
@@ -199,7 +253,7 @@
       if (synSet.size) {
         synSet.forEach(s => {
           const btn = document.createElement('button');
-          btn.className = 'px-2 py-1 rounded-lg border hover:bg-gray-50';
+          btn.className = 'px-2 py-1 rounded-lg border hover:bg-gray-50 dark:hover:bg-gray-800 dark:border-gray-700';
           btn.textContent = s;
           btn.addEventListener('click', () => search(s));
           synonymsEl.appendChild(btn);
