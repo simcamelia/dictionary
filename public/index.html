@@ -7,10 +7,8 @@
 
   <!-- Tailwind config (enable class-based dark mode) -->
   <script>
-    window.tailwind = window.tailwind || {};
-    tailwind.config = { darkMode: 'class' };
+    tailwind = { config: { darkMode: 'class' } };
   </script>
-  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
 
   <!-- SEO Meta -->
@@ -30,47 +28,14 @@
   <meta name="twitter:description" content="A responsive dictionary web app with phonetics, audio, and synonyms." />
   <meta name="twitter:image" content="https://your-dictionary-site.netlify.app/images/dictionary-preview.png" />
 
-  <!-- Favicon -->
   <link rel="icon" href="/images/Snapchat-2205782.png" type="image/png" />
 
-  <!-- Styles -->
   <style>
-    :root {
-      --brand: #6b46c1;
-      --brand-2: #7c3aed;
-      --accent: #22c55e;
-    }
-    .brand-gradient {
-      background: linear-gradient(135deg, var(--brand), var(--brand-2));
-    }
-    .soft-shadow {
-      box-shadow: 0 12px 28px rgba(17, 24, 39, 0.12);
-    }
+    :root { --accent:#22c55e; }
+    .soft-shadow{ box-shadow:0 12px 28px rgba(17,24,39,.12); }
   </style>
 
-  <!-- JSON-LD Structured Data -->
-  <script type="application/ld+json">
-  {
-    "@context":"https://schema.org",
-    "@type":"WebSite",
-    "name":"Camelia • Simple Dictionary",
-    "url":"https://your-dictionary-site.netlify.app/",
-    "creator":{
-      "@type":"Person",
-      "name":"Camelia Simion",
-      "jobTitle":"Technical Support Engineer II"
-    },
-    "about":"Dictionary app with definitions, phonetics, and synonyms.",
-    "mainEntity":{
-      "@type":"SoftwareApplication",
-      "name":"Simple Dictionary",
-      "applicationCategory":"EducationalApplication",
-      "operatingSystem":"All"
-    }
-  }
-  </script>
-
-  <!-- Theme boot: apply saved/system theme BEFORE paint -->
+  <!-- Apply saved/system theme BEFORE paint -->
   <script>
     (function initTheme(){
       const root = document.documentElement;
@@ -85,8 +50,8 @@
 </head>
 <body class="bg-gray-50 text-gray-800 min-h-screen flex flex-col dark:bg-gray-950 dark:text-gray-100">
 
-  <!-- HERO / NAV -->
-  <header class="brand-gradient text-white">
+  <!-- HERO / NAV (now with visible dark gradient) -->
+  <header class="bg-gradient-to-br from-violet-700 to-purple-700 dark:from-gray-900 dark:to-gray-800 text-white">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
       <div class="flex items-center justify-between">
         <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight">Simple Dictionary</h1>
@@ -105,12 +70,14 @@
 
       <!-- Search -->
       <form id="searchForm" class="mt-6">
-        <div class="bg-white rounded-2xl p-2 flex items-center gap-2 soft-shadow dark:bg-gray-900">
+        <div class="rounded-2xl p-2 flex items-center gap-2 soft-shadow bg-white dark:bg-gray-900">
           <input id="query"
                  type="search"
                  placeholder="Search a word (e.g., serendipity)"
-                 class="flex-1 px-4 py-3 rounded-xl outline-none bg-white text-gray-900 placeholder:text-gray-500
-                        focus:ring-2 focus:ring-emerald-400 dark:bg-gray-900 dark:text-gray-100 dark:placeholder:text-gray-400"
+                 class="flex-1 px-4 py-3 rounded-xl outline-none
+                        bg-white text-gray-900 placeholder:text-gray-500
+                        focus:ring-2 focus:ring-emerald-400
+                        dark:bg-gray-900 dark:text-gray-100 dark:placeholder:text-gray-400"
                  autocapitalize="off" autocorrect="off" spellcheck="false" required />
           <button type="submit"
                   class="px-4 py-3 rounded-xl text-white font-medium"
@@ -132,12 +99,14 @@
   <!-- RESULTS -->
   <main class="flex-1">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div id="status" class="hidden rounded-xl border bg-white p-4 soft-shadow
-                             dark:bg-gray-900 dark:border-gray-800"></div>
+      <div id="status"
+           class="hidden rounded-xl border bg-white p-4 soft-shadow
+                  dark:bg-gray-900 dark:border-gray-800"></div>
 
       <!-- Result Card -->
-      <article id="card" class="mt-6 bg-white rounded-2xl border soft-shadow overflow-hidden hidden
-                                dark:bg-gray-900 dark:border-gray-800">
+      <article id="card"
+               class="mt-6 bg-white rounded-2xl border soft-shadow overflow-hidden hidden
+                      dark:bg-gray-900 dark:border-gray-800">
         <div class="p-5 border-b dark:border-gray-800">
           <div class="flex items-start justify-between gap-3">
             <div>
@@ -145,7 +114,8 @@
               <div id="phonetic" class="text-gray-600 dark:text-gray-300"></div>
             </div>
             <button id="playBtn"
-                    class="px-3 py-2 rounded-lg border text-sm hidden hover:bg-gray-50 dark:hover:bg-gray-800 dark:border-gray-700"
+                    class="px-3 py-2 rounded-lg border text-sm hidden hover:bg-gray-50
+                           dark:hover:bg-gray-800 dark:border-gray-700"
                     title="Play pronunciation">🔊 Play</button>
           </div>
         </div>
@@ -198,8 +168,9 @@
       themeIcon.textContent = mode === 'dark' ? '☀️' : '🌙';
       themeBtn.title = mode === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
     }
-    // Initialize current icon
+    // Initialize current icon from class on <html>
     setTheme(document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+
     themeBtn.addEventListener('click', () => {
       const isDark = document.documentElement.classList.contains('dark');
       setTheme(isDark ? 'light' : 'dark');
