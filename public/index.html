@@ -5,9 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Camelia • Simple Dictionary</title>
 
-  <!-- Tailwind config (enable class-based dark mode) -->
+  <!-- Tailwind CDN: put config BEFORE the CDN script -->
   <script>
-    tailwind = { config: { darkMode: 'class' } };
+    tailwind = {}; /* ensure object exists */
+    tailwind.config = { darkMode: 'class' };
   </script>
   <script src="https://cdn.tailwindcss.com"></script>
 
@@ -40,17 +41,15 @@
     (function initTheme(){
       const root = document.documentElement;
       const saved = localStorage.getItem('theme'); // 'dark' | 'light' | null
-      if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-        root.classList.add('dark');
-      } else {
-        root.classList.remove('dark');
-      }
+      const preferDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (saved === 'dark' || (!saved && preferDark)) root.classList.add('dark');
+      else root.classList.remove('dark');
     })();
   </script>
 </head>
 <body class="bg-gray-50 text-gray-800 min-h-screen flex flex-col dark:bg-gray-950 dark:text-gray-100">
 
-  <!-- HERO / NAV (now with visible dark gradient) -->
+  <!-- HERO -->
   <header class="bg-gradient-to-br from-violet-700 to-purple-700 dark:from-gray-900 dark:to-gray-800 text-white">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
       <div class="flex items-center justify-between">
@@ -71,8 +70,7 @@
       <!-- Search -->
       <form id="searchForm" class="mt-6">
         <div class="rounded-2xl p-2 flex items-center gap-2 soft-shadow bg-white dark:bg-gray-900">
-          <input id="query"
-                 type="search"
+          <input id="query" type="search"
                  placeholder="Search a word (e.g., serendipity)"
                  class="flex-1 px-4 py-3 rounded-xl outline-none
                         bg-white text-gray-900 placeholder:text-gray-500
@@ -103,7 +101,6 @@
            class="hidden rounded-xl border bg-white p-4 soft-shadow
                   dark:bg-gray-900 dark:border-gray-800"></div>
 
-      <!-- Result Card -->
       <article id="card"
                class="mt-6 bg-white rounded-2xl border soft-shadow overflow-hidden hidden
                       dark:bg-gray-900 dark:border-gray-800">
@@ -120,10 +117,8 @@
           </div>
         </div>
 
-        <!-- Definitions -->
         <div id="meanings" class="p-5 space-y-6"></div>
 
-        <!-- Synonyms -->
         <div id="synonymsWrap" class="px-5 pb-5 hidden">
           <h3 class="font-semibold mb-2">Synonyms</h3>
           <div id="synonyms" class="flex flex-wrap gap-2"></div>
@@ -144,7 +139,7 @@
     </div>
   </footer>
 
-  <!-- JS Logic -->
+  <!-- JS -->
   <script>
     const $ = (q) => document.querySelector(q);
     const statusEl = $('#status');
@@ -162,15 +157,13 @@
     // Theme toggling + persistence
     function setTheme(mode){ // 'dark' | 'light'
       const root = document.documentElement;
-      if (mode === 'dark') root.classList.add('dark');
-      else root.classList.remove('dark');
+      if (mode === 'dark') root.classList.add('dark'); else root.classList.remove('dark');
       localStorage.setItem('theme', mode);
       themeIcon.textContent = mode === 'dark' ? '☀️' : '🌙';
       themeBtn.title = mode === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
     }
-    // Initialize current icon from class on <html>
+    // Initialize icon based on current class
     setTheme(document.documentElement.classList.contains('dark') ? 'dark' : 'light');
-
     themeBtn.addEventListener('click', () => {
       const isDark = document.documentElement.classList.contains('dark');
       setTheme(isDark ? 'light' : 'dark');
