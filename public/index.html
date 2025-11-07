@@ -4,31 +4,41 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#6c5ce7" />
+
     <meta
       name="description"
-      content="A simple React dictionary that fetches word definitions and Pixabay images."
+      content="A React Dictionary app built by Camelia Simion — fetches word definitions and related Pixabay images."
     />
     <title>React Dictionary by Camelia Simion</title>
 
-    <!-- Allow external Pixabay images -->
+    <!-- ✅ Allow safe API and image connections -->
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; img-src 'self' https: data:; media-src https: data:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';"
+      content="
+        default-src 'self';
+        connect-src 'self' https:;
+        img-src 'self' https: data:;
+        media-src 'self' https: data:;
+        script-src 'self' 'unsafe-inline';
+        style-src 'self' 'unsafe-inline';
+      "
     />
 
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
     <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
 
     <!-- Optional: Google Fonts -->
     <link
       href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600&display=swap"
       rel="stylesheet"
     />
+
+    <!-- Optional: Tailwind or other CSS frameworks can be used locally via build -->
   </head>
+
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
-
-    <!-- CRA injects compiled scripts here -->
+    <!-- React scripts are automatically injected by the build -->
   </body>
 </html>
