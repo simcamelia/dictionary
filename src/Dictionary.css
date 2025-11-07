@@ -116,3 +116,54 @@
     grid-template-columns: 1fr;
   }
 }
+
+.meanings {
+  margin-top: 12px;
+}
+
+.meaning-block {
+  margin-top: 14px;
+  padding-top: 8px;
+  border-top: 1px dashed #e2e2e2;
+}
+
+.pos {
+  font-size: 16px;
+  font-weight: 700;
+  color: #444;
+  margin: 6px 0 4px;
+  text-transform: lowercase;
+  letter-spacing: 0.3px;
+}
+
+.definitions-list {
+  margin: 6px 0 0 18px; /* indented list */
+  padding: 0;
+}
+
+.definition-item {
+  margin: 6px 0;
+}
+
+.definition-text {
+  line-height: 1.55;
+}
+
+.example {
+  margin-top: 4px;
+  font-style: italic;
+  color: #555;
+}
+
+.sa-row {
+  margin-top: 6px;
+  font-size: 14px;
+  color: #333;
+}
+
+.synonyms .label,
+.antonyms .label {
+  font-weight: 600;
+  color: #222;
+}
+
