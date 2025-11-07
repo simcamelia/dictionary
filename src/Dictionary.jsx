@@ -8,10 +8,10 @@ export default function Dictionary() {
   const [definition, setDefinition] = useState(null);
   const [imageUrl, setImageUrl] = useState("");
 
-  // CRA uses process.env.REACT_APP_*
+  // ✅ CRA syntax (NOT import.meta.env)
   const PIXABAY_KEY = process.env.REACT_APP_PIXABAY_KEY;
 
-  const handleSearch = async (e) => {
+  async function handleSearch(e) {
     e.preventDefault();
     setError("");
     setLoading(true);
@@ -30,17 +30,17 @@ export default function Dictionary() {
       }
       setDefinition(dictJson[0]);
 
-      // Pixabay
+      // Pixabay API
       if (!PIXABAY_KEY) {
-        console.warn(
-          "Missing REACT_APP_PIXABAY_KEY. Add it to .env.local and Netlify, then rebuild."
-        );
+        console.warn("Missing REACT_APP_PIXABAY_KEY in build.");
       } else {
         const url = `https://pixabay.com/api/?key=${PIXABAY_KEY}&q=${encodeURIComponent(
           word
         )}&image_type=photo&per_page=3&safesearch=true`;
+
         const pixRes = await fetch(url);
         if (!pixRes.ok) throw new Error(`Pixabay HTTP ${pixRes.status}`);
+
         const pixJson = await pixRes.json();
         const first = pixJson?.hits?.[0]?.webformatURL;
         if (first) setImageUrl(first);
@@ -51,7 +51,7 @@ export default function Dictionary() {
     } finally {
       setLoading(false);
     }
-  };
+  }
 
   return (
     <div className="dictionary-container">
