@@ -1,40 +1,113 @@
-.Dictionary {
-  max-width: 960px;
-  margin: 0 auto;
+.dictionary-container {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 16px;
+  font-family: "Segoe UI", Roboto, sans-serif;
 }
 
-.Dictionary section {
-  box-shadow: 0px 30px 50px rgba(65, 50, 100, 0.08);
+.title {
+  font-size: 28px;
+  margin-bottom: 16px;
+  text-align: center;
+  color: #333;
+}
+
+.search-form {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.search-input {
+  flex: 1;
+  padding: 10px 12px;
+  border: 1px solid #ccc;
   border-radius: 8px;
-  background: white;
-  margin-top: 10px;
-  padding: 40px;
+  font-size: 16px;
 }
 
-.Dictionary label {
-  font-weight: 600;
-  font-style: normal;
-  font-size: 24px;
-  margin-bottom: 20px;
-  display: block;
-  line-height: 29px;
+.search-button {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  background: #6c5ce7;
+  color: white;
+  cursor: pointer;
+  transition: background 0.2s;
 }
 
-.Dictionary .search-input {
-  display: block;
-  height: 64px;
-  color: #666666;
-  font-size: 18px;
-  line-height: 21px;
-  padding: 22px;
-  border: 1px solid #dddddd;
-  border-radius: 6px;
+.search-button:hover {
+  background: #5a4fd1;
+}
 
+.search-button:disabled {
+  opacity: 0.7;
+  cursor: default;
+}
+
+.error {
+  color: #b00020;
+  margin-bottom: 12px;
+}
+
+.results {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.definition-card,
+.image-card {
+  border: 1px solid #eee;
+  border-radius: 12px;
+  padding: 16px;
+  min-height: 220px;
+  background: #fafafa;
+}
+
+.word {
+  font-size: 22px;
+  margin-bottom: 4px;
+  color: #111;
+}
+
+.phonetic {
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.meaning {
+  line-height: 1.5;
+}
+
+.audio {
+  margin-top: 8px;
   width: 100%;
 }
 
+.image-card img {
+  display: block;
+  max-width: 100%;
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+  object-fit: cover;
+}
 
-.Dictionary .hint {
-	margin-top: 15px;
-	display: block;
+.image-card .debug {
+  text-align: center;
+  margin-top: 8px;
+  font-size: 14px;
+}
+
+.placeholder {
+  color: #777;
+  text-align: center;
+  padding: 40px 0;
+}
+
+@media (max-width: 720px) {
+  .results {
+    grid-template-columns: 1fr;
+  }
 }
