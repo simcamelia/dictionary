@@ -85,6 +85,11 @@
   width: 100%;
 }
 
+.image-card {
+  overflow: visible;
+}
+
+.word-image,
 .image-card img {
   display: block;
   max-width: 100%;
