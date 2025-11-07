@@ -1,0 +1,96 @@
+/* Basic styles for the dictionary UI */
+.dictionary-container {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 16px;
+}
+
+.title {
+  font-size: 28px;
+  margin-bottom: 16px;
+}
+
+.search-form {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.search-input {
+  flex: 1;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  font-size: 16px;
+}
+
+.search-button {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 10px;
+  background: #6c5ce7;
+  color: white;
+  cursor: pointer;
+}
+
+.search-button:disabled {
+  opacity: 0.7;
+  cursor: default;
+}
+
+.error {
+  color: #b00020;
+  margin-bottom: 12px;
+}
+
+.results {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.definition-card, .image-card {
+  border: 1px solid #eee;
+  border-radius: 14px;
+  padding: 16px;
+  min-height: 220px;
+}
+
+.word {
+  font-size: 22px;
+  margin-bottom: 4px;
+}
+
+.phonetic {
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.meaning {
+  line-height: 1.5;
+}
+
+.audio {
+  margin-top: 8px;
+  width: 100%;
+}
+
+.word-image {
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+  display: block;
+}
+
+.placeholder {
+  color: #777;
+  text-align: center;
+  padding: 40px 0;
+}
+
+/* Simple responsiveness */
+@media (max-width: 720px) {
+  .results {
+    grid-template-columns: 1fr;
+  }
+}
