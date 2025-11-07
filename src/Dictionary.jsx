@@ -1,9 +1,6 @@
 import React, { useState } from "react";
 import "./Dictionary.css";
 
-console.log("[Pixabay] Key present?", Boolean(process.env.REACT_APP_PIXABAY_KEY));
-console.log("[Pixabay] Using JSX file");
-
 export default function Dictionary() {
   const [word, setWord] = useState("");
   const [loading, setLoading] = useState(false);
@@ -11,8 +8,12 @@ export default function Dictionary() {
   const [definition, setDefinition] = useState(null);
   const [imageUrl, setImageUrl] = useState("");
 
-  // ✅ CRA syntax (NOT import.meta.env)
+  // ✅ CRA reads env vars from process.env and they MUST start with REACT_APP_
   const PIXABAY_KEY = process.env.REACT_APP_PIXABAY_KEY;
+
+  // helpful diagnostics in the live console
+  console.log("[Pixabay] key present?", Boolean(PIXABAY_KEY));
+  console.log("[Pixabay] Using Dictionary.jsx");
 
   async function handleSearch(e) {
     e.preventDefault();
@@ -33,7 +34,7 @@ export default function Dictionary() {
       }
       setDefinition(dictJson[0]);
 
-      // Pixabay API
+      // Pixabay
       if (!PIXABAY_KEY) {
         console.warn("Missing REACT_APP_PIXABAY_KEY in build.");
       } else {
@@ -43,10 +44,11 @@ export default function Dictionary() {
 
         const pixRes = await fetch(url);
         if (!pixRes.ok) throw new Error(`Pixabay HTTP ${pixRes.status}`);
-
         const pixJson = await pixRes.json();
+
+        console.log("[Pixabay] hits:", pixJson?.hits?.length, pixJson);
         const first = pixJson?.hits?.[0]?.webformatURL;
-        if (first) setImageUrl(first);
+        setImageUrl(first || "");
       }
     } catch (err) {
       console.error(err);
@@ -91,25 +93,4 @@ export default function Dictionary() {
               )}
               {definition.phonetics?.[0]?.audio && (
                 <audio controls className="audio">
-                  <source src={definition.phonetics[0].audio} type="audio/mpeg" />
-                </audio>
-              )}
-            </>
-          ) : (
-            <div className="placeholder">Search a word to see its meaning</div>
-          )}
-        </div>
-
-        <div className="image-card">
-          {imageUrl ? (
-            <img src={imageUrl} alt={word} className="word-image" />
-          ) : (
-            <div className="placeholder">
-              {loading ? "Fetching image..." : "No image yet — search a word"}
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
+                  <source sr
