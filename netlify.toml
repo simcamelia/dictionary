@@ -1,5 +1,5 @@
 [build]
-  command = "npm run build"
+  command = "node -e \"console.log('REACT_APP_PIXABAY_KEY length:', (process.env.REACT_APP_PIXABAY_KEY||'').length)\" && npm run build"
   publish = "build"
 
 [[redirects]]
