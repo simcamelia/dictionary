@@ -1,30 +1,26 @@
-import React, { useState } from "react";
+=import React, { useState } from "react";
 import "./Dictionary.css";
 
 export default function Dictionary() {
   const [word, setWord] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [definition, setDefinition] = useState(null);
+  const [entry, setEntry] = useState(null);      // store the whole entry
   const [imageUrl, setImageUrl] = useState("");
   const [imgError, setImgError] = useState(false);
 
-  // CRA env var
   const PIXABAY_KEY = process.env.REACT_APP_PIXABAY_KEY;
-
-  // temporary diagnostics
-  console.log("[Pixabay] key present?", Boolean(PIXABAY_KEY));
 
   async function handleSearch(e) {
     e.preventDefault();
     setError("");
     setLoading(true);
-    setDefinition(null);
+    setEntry(null);
     setImageUrl("");
     setImgError(false);
 
     try {
-      // Dictionary API
+      // === Dictionary API ===
       const dictRes = await fetch(
         `https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(
           word
@@ -35,38 +31,27 @@ export default function Dictionary() {
       if (!Array.isArray(dictJson) || !dictJson[0]) {
         throw new Error("No definition found.");
       }
-      const entry = dictJson[0];
-      setDefinition(entry);
+      const firstEntry = dictJson[0];
+      setEntry(firstEntry);
 
-      // Pixabay API
-      if (!PIXABAY_KEY) {
-        console.warn("Missing REACT_APP_PIXABAY_KEY in build.");
-      } else {
+      // === Pixabay (unchanged) ===
+      if (PIXABAY_KEY) {
         const url = `https://pixabay.com/api/?key=${PIXABAY_KEY}&q=${encodeURIComponent(
           word
         )}&image_type=photo&per_page=5&safesearch=true`;
-
         const pixRes = await fetch(url);
-        if (!pixRes.ok) throw new Error(`Pixabay HTTP ${pixRes.status}`);
-        const pixJson = await pixRes.json();
-
-        console.log("[Pixabay] hits:", pixJson?.hits?.length);
-
-        // Pick the first hit that has a usable http(s) URL
-        const hit =
-          pixJson?.hits?.find(
-            (h) =>
-              typeof h?.webformatURL === "string" &&
-              /^(http|https):/.test(h.webformatURL)
-          ) || pixJson?.hits?.[0];
-
-        const firstUrl =
-          hit?.webformatURL || hit?.largeImageURL || hit?.previewURL || "";
-
-        // force https just in case (avoid mixed content)
-        const safeUrl = firstUrl ? firstUrl.replace(/^http:/, "https:") : "";
-        console.log("[Pixabay] imageUrl:", safeUrl);
-        setImageUrl(safeUrl);
+        if (pixRes.ok) {
+          const pixJson = await pixRes.json();
+          const hit =
+            pixJson?.hits?.find(
+              (h) =>
+                typeof h?.webformatURL === "string" &&
+                /^(http|https):/.test(h.webformatURL)
+            ) || pixJson?.hits?.[0];
+          const firstUrl =
+            hit?.webformatURL || hit?.largeImageURL || hit?.previewURL || "";
+          setImageUrl(firstUrl ? firstUrl.replace(/^http:/, "https:") : "");
+        }
       }
     } catch (err) {
       console.error(err);
@@ -76,8 +61,12 @@ export default function Dictionary() {
     }
   }
 
-  // choose a safe audio URL if present
-  const audioUrl = definition?.phonetics?.find((p) => p?.audio)?.audio || "";
+  // prefer any available audio
+  const audioUrl = entry?.phonetics?.find((p) => p?.audio)?.audio || "";
+  const phoneticText =
+    entry?.phonetics?.find((p) => p?.text)?.text ||
+    entry?.phonetics?.[0]?.text ||
+    "";
 
   return (
     <div className="dictionary-container">
@@ -101,21 +90,95 @@ export default function Dictionary() {
 
       <div className="results">
         <div className="definition-card">
-          {definition ? (
+          {entry ? (
             <>
-              <h2 className="word">{definition.word}</h2>
-              {definition.phonetics?.[0]?.text && (
-                <div className="phonetic">{definition.phonetics[0].text}</div>
-              )}
-              {definition.meanings?.[0]?.definitions?.[0]?.definition && (
-                <p className="meaning">
-                  {definition.meanings[0].definitions[0].definition}
-                </p>
-              )}
+              <h2 className="word">{entry.word}</h2>
+              {phoneticText && <div className="phonetic">{phoneticText}</div>}
               {audioUrl && (
                 <audio controls className="audio">
                   <source src={audioUrl} type="audio/mpeg" />
                 </audio>
+              )}
+
+              {/* ALL meanings / parts of speech */}
+              <div className="meanings">
+                {entry.meanings?.map((m, i) => (
+                  <section key={i} className="meaning-block">
+                    {m.partOfSpeech && (
+                      <h3 className="pos">{m.partOfSpeech}</h3>
+                    )}
+
+                    {/* all definitions for this part of speech */}
+                    <ol className="definitions-list">
+                      {m.definitions?.map((d, j) => (
+                        <li key={j} className="definition-item">
+                          <div className="definition-text">{d.definition}</div>
+
+                          {d.example && (
+                            <div className="example">“{d.example}”</div>
+                          )}
+
+                          {(d.synonyms?.length || d.antonyms?.length) && (
+                            <div className="sa-row">
+                              {d.synonyms?.length ? (
+                                <div className="synonyms">
+                                  <span className="label">Synonyms:</span>{" "}
+                                  {d.synonyms.slice(0, 10).join(", ")}
+                                  {d.synonyms.length > 10 && " …"}
+                                </div>
+                              ) : null}
+                              {d.antonyms?.length ? (
+                                <div className="antonyms">
+                                  <span className="label">Antonyms:</span>{" "}
+                                  {d.antonyms.slice(0, 10).join(", ")}
+                                  {d.antonyms.length > 10 && " …"}
+                                </div>
+                              ) : null}
+                            </div>
+                          )}
+                        </li>
+                      ))}
+                    </ol>
+
+                    {/* meaning-level synonyms/antonyms if present */}
+                    {(m.synonyms?.length || m.antonyms?.length) && (
+                      <div className="sa-row">
+                        {m.synonyms?.length ? (
+                          <div className="synonyms">
+                            <span className="label">Synonyms:</span>{" "}
+                            {m.synonyms.slice(0, 15).join(", ")}
+                            {m.synonyms.length > 15 && " …"}
+                          </div>
+                        ) : null}
+                        {m.antonyms?.length ? (
+                          <div className="antonyms">
+                            <span className="label">Antonyms:</span>{" "}
+                            {m.antonyms.slice(0, 15).join(", ")}
+                            {m.antonyms.length > 15 && " …"}
+                          </div>
+                        ) : null}
+                      </div>
+                    )}
+                  </section>
+                ))}
+              </div>
+
+              {/* source/license if provided */}
+              {(entry.sourceUrls?.length || entry.license) && (
+                <div className="source">
+                  {entry.sourceUrls?.[0] && (
+                    <a
+                      href={entry.sourceUrls[0]}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Source
+                    </a>
+                  )}
+                  {entry.license?.name && (
+                    <span className="license"> · {entry.license.name}</span>
+                  )}
+                </div>
               )}
             </>
           ) : (
@@ -125,33 +188,15 @@ export default function Dictionary() {
 
         <div className="image-card">
           {imageUrl && !imgError ? (
-            <>
-              <img
-                src={imageUrl}
-                alt={word}
-                className="word-image"
-                onError={() => setImgError(true)}
-              />
-              <p className="debug">
-                <a href={imageUrl} target="_blank" rel="noreferrer">
-                  Open image
-                </a>
-              </p>
-            </>
+            <img
+              src={imageUrl}
+              alt={word}
+              className="word-image"
+              onError={() => setImgError(true)}
+            />
           ) : (
             <div className="placeholder">
-              {loading
-                ? "Fetching image..."
-                : imgError
-                ? "Image failed to load (click the debug link below)."
-                : "No image yet — search a word"}
-              {imageUrl && imgError && (
-                <p className="debug">
-                  <a href={imageUrl} target="_blank" rel="noreferrer">
-                    Open image
-                  </a>
-                </p>
-              )}
+              {loading ? "Fetching image..." : "No image yet — search a word"}
             </div>
           )}
         </div>
