@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import "./Dictionary.css";
 
+console.log("[Pixabay] Key present?", Boolean(process.env.REACT_APP_PIXABAY_KEY));
+console.log("[Pixabay] Using JSX file");
+
 export default function Dictionary() {
   const [word, setWord] = useState("");
   const [loading, setLoading] = useState(false);
