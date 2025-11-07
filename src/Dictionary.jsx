@@ -7,13 +7,13 @@ export default function Dictionary() {
   const [error, setError] = useState("");
   const [definition, setDefinition] = useState(null);
   const [imageUrl, setImageUrl] = useState("");
+  const [imgError, setImgError] = useState(false);
 
-  // CRA environment variable
+  // CRA env var
   const PIXABAY_KEY = process.env.REACT_APP_PIXABAY_KEY;
 
-  // diagnostic logs (you can remove later)
+  // temporary diagnostics
   console.log("[Pixabay] key present?", Boolean(PIXABAY_KEY));
-  console.log("[Pixabay] Using Dictionary.jsx");
 
   async function handleSearch(e) {
     e.preventDefault();
@@ -21,9 +21,10 @@ export default function Dictionary() {
     setLoading(true);
     setDefinition(null);
     setImageUrl("");
+    setImgError(false);
 
     try {
-      // === Dictionary API ===
+      // Dictionary API
       const dictRes = await fetch(
         `https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(
           word
@@ -37,24 +38,32 @@ export default function Dictionary() {
       const entry = dictJson[0];
       setDefinition(entry);
 
-      // === Pixabay API ===
+      // Pixabay API
       if (!PIXABAY_KEY) {
         console.warn("Missing REACT_APP_PIXABAY_KEY in build.");
       } else {
         const url = `https://pixabay.com/api/?key=${PIXABAY_KEY}&q=${encodeURIComponent(
           word
-        )}&image_type=photo&per_page=3&safesearch=true`;
+        )}&image_type=photo&per_page=5&safesearch=true`;
 
         const pixRes = await fetch(url);
         if (!pixRes.ok) throw new Error(`Pixabay HTTP ${pixRes.status}`);
         const pixJson = await pixRes.json();
 
-        console.log("[Pixabay] hits:", pixJson?.hits?.length, pixJson);
+        console.log("[Pixabay] hits:", pixJson?.hits?.length);
+
+        // Pick the first hit that has a usable http(s) URL
+        const hit =
+          pixJson?.hits?.find(
+            (h) =>
+              typeof h?.webformatURL === "string" &&
+              /^(http|https):/.test(h.webformatURL)
+          ) || pixJson?.hits?.[0];
 
         const firstUrl =
-          pixJson?.hits?.[0]?.webformatURL ||
-          pixJson?.hits?.[0]?.largeImageURL ||
-          "";
+          hit?.webformatURL || hit?.largeImageURL || hit?.previewURL || "";
+
+        // force https just in case (avoid mixed content)
         const safeUrl = firstUrl ? firstUrl.replace(/^http:/, "https:") : "";
         console.log("[Pixabay] imageUrl:", safeUrl);
         setImageUrl(safeUrl);
@@ -67,9 +76,8 @@ export default function Dictionary() {
     }
   }
 
-  // safely choose an audio URL
-  const audioUrl =
-    definition?.phonetics?.find((p) => p?.audio)?.audio || "";
+  // choose a safe audio URL if present
+  const audioUrl = definition?.phonetics?.find((p) => p?.audio)?.audio || "";
 
   return (
     <div className="dictionary-container">
@@ -116,9 +124,14 @@ export default function Dictionary() {
         </div>
 
         <div className="image-card">
-          {imageUrl ? (
+          {imageUrl && !imgError ? (
             <>
-              <img src={imageUrl} alt={word} className="word-image" />
+              <img
+                src={imageUrl}
+                alt={word}
+                className="word-image"
+                onError={() => setImgError(true)}
+              />
               <p className="debug">
                 <a href={imageUrl} target="_blank" rel="noreferrer">
                   Open image
@@ -127,7 +140,18 @@ export default function Dictionary() {
             </>
           ) : (
             <div className="placeholder">
-              {loading ? "Fetching image..." : "No image yet — search a word"}
+              {loading
+                ? "Fetching image..."
+                : imgError
+                ? "Image failed to load (click the debug link below)."
+                : "No image yet — search a word"}
+              {imageUrl && imgError && (
+                <p className="debug">
+                  <a href={imageUrl} target="_blank" rel="noreferrer">
+                    Open image
+                  </a>
+                </p>
+              )}
             </div>
           )}
         </div>
