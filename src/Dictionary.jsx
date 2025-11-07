@@ -64,7 +64,10 @@ export default function Dictionary() {
 
   return (
     <div className="dictionary-container">
-      <h1 className="title">Dictionary</h1>
+      <h1 className="title">
+        <span className="title-icon" role="img" aria-label="rainbow">🌈</span>
+        Dictionary
+      </h1>
 
       <form onSubmit={handleSearch} className="search-form">
         <input
@@ -127,25 +130,6 @@ export default function Dictionary() {
                         </li>
                       ))}
                     </ol>
-
-                    {(m?.synonyms?.length || m?.antonyms?.length) ? (
-                      <div className="sa-row">
-                        {m?.synonyms?.length ? (
-                          <div className="synonyms">
-                            <span className="label">Synonyms:</span>{" "}
-                            {m.synonyms.slice(0, 15).join(", ")}
-                            {m.synonyms.length > 15 ? " …" : ""}
-                          </div>
-                        ) : null}
-                        {m?.antonyms?.length ? (
-                          <div className="antonyms">
-                            <span className="label">Antonyms:</span>{" "}
-                            {m.antonyms.slice(0, 15).join(", ")}
-                            {m.antonyms.length > 15 ? " …" : ""}
-                          </div>
-                        ) : null}
-                      </div>
-                    ) : null}
                   </section>
                 ))}
               </div>
