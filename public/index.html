@@ -1,263 +1,34 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Camelia • Simple Dictionary</title>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#6c5ce7" />
+    <meta
+      name="description"
+      content="A simple React dictionary that fetches word definitions and Pixabay images."
+    />
+    <title>React Dictionary by Camelia Simion</title>
 
-  <!-- 0) Apply saved/system theme BEFORE paint -->
-  <script>
-    (function () {
-      const root = document.documentElement;
-      const saved = localStorage.getItem('theme'); // 'dark' | 'light' | null
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      if (saved === 'dark' || (!saved && prefersDark)) root.classList.add('dark');
-      else root.classList.remove('dark');
-    })();
-  </script>
+    <!-- Allow external Pixabay images -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; img-src 'self' https: data:; media-src https: data:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';"
+    />
 
-  <!-- 1) Tailwind config MUST be defined BEFORE the CDN script -->
-  <script>
-    window.tailwind = { config: { darkMode: 'class' } };
-  </script>
-  <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
 
-  <!-- Meta (kept short for clarity) -->
-  <meta name="description" content="Minimal dictionary app with definitions, phonetics, audio, and synonyms." />
-  <link rel="icon" href="/images/Snapchat-2205782.png" type="image/png" />
+    <!-- Optional: Google Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div>
 
-  <style>
-    :root { --accent:#22c55e; }
-    .soft-shadow { box-shadow: 0 12px 28px rgba(17,24,39,.12); }
-  </style>
-</head>
-<body class="bg-gray-50 text-gray-800 min-h-screen flex flex-col dark:bg-gray-950 dark:text-gray-100">
-
-  <!-- HERO -->
-  <header class="bg-gradient-to-br from-violet-700 to-purple-700 dark:from-gray-900 dark:to-gray-800 text-white">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-      <div class="flex items-center justify-between">
-        <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight">Simple Dictionary</h1>
-
-        <!-- Theme toggle -->
-        <button id="themeToggle"
-          class="rounded-xl px-3 py-2 bg-white/10 hover:bg-white/20 border border-white/20 text-sm"
-          title="Toggle dark mode" aria-label="Toggle dark mode">
-          <span id="themeIcon">🌙</span>
-        </button>
-      </div>
-
-      <p class="mt-2 text-white/90 max-w-2xl">
-        Search any English word for definitions, phonetics, audio, and synonyms — built by Camelia Simion.
-      </p>
-
-      <!-- Search -->
-      <form id="searchForm" class="mt-6">
-        <div class="rounded-2xl p-2 flex items-center gap-2 soft-shadow bg-white dark:bg-gray-900">
-          <input id="query" type="search"
-                 placeholder="Search a word (e.g., serendipity)"
-                 class="flex-1 px-4 py-3 rounded-xl outline-none
-                        bg-white text-gray-900 placeholder:text-gray-500
-                        focus:ring-2 focus:ring-emerald-400
-                        dark:bg-gray-900 dark:text-gray-100 dark:placeholder:text-gray-400"
-                 autocapitalize="off" autocorrect="off" spellcheck="false" required />
-          <button type="submit"
-                  class="px-4 py-3 rounded-xl text-white font-medium"
-                  style="background: var(--accent)">Search</button>
-        </div>
-      </form>
-
-      <!-- Quick Suggestions -->
-      <div class="mt-3 text-sm flex flex-wrap gap-2">
-        <span class="opacity-90">Try:</span>
-        <button class="suggest px-2 py-1 rounded-lg bg-white/10 hover:bg-white/20">sunset</button>
-        <button class="suggest px-2 py-1 rounded-lg bg-white/10 hover:bg-white/20">ephemeral</button>
-        <button class="suggest px-2 py-1 rounded-lg bg-white/10 hover:bg-white/20">resilience</button>
-        <button class="suggest px-2 py-1 rounded-lg bg-white/10 hover:bg-white/20">ubiquitous</button>
-      </div>
-    </div>
-  </header>
-
-  <!-- RESULTS -->
-  <main class="flex-1">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div id="status"
-           class="hidden rounded-xl border bg-white p-4 soft-shadow
-                  dark:bg-gray-900 dark:border-gray-800"></div>
-
-      <article id="card"
-               class="mt-6 bg-white rounded-2xl border soft-shadow overflow-hidden hidden
-                      dark:bg-gray-900 dark:border-gray-800">
-        <div class="p-5 border-b dark:border-gray-800">
-          <div class="flex items-start justify-between gap-3">
-            <div>
-              <h2 id="word" class="text-2xl font-bold"></h2>
-              <div id="phonetic" class="text-gray-600 dark:text-gray-300"></div>
-            </div>
-            <button id="playBtn"
-                    class="px-3 py-2 rounded-lg border text-sm hidden hover:bg-gray-50
-                           dark:hover:bg-gray-800 dark:border-gray-700"
-                    title="Play pronunciation">🔊 Play</button>
-          </div>
-        </div>
-
-        <div id="meanings" class="p-5 space-y-6"></div>
-
-        <div id="synonymsWrap" class="px-5 pb-5 hidden">
-          <h3 class="font-semibold mb-2">Synonyms</h3>
-          <div id="synonyms" class="flex flex-wrap gap-2"></div>
-        </div>
-      </article>
-    </div>
-  </main>
-
-  <!-- FOOTER -->
-  <footer class="border-t dark:border-gray-800">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 text-sm flex flex-col sm:flex-row items-center gap-3 justify-between">
-      <p>© <span id="year"></span> Simple Dictionary</p>
-      <p class="text-gray-700 dark:text-gray-300 flex items-center gap-1">
-        🌈 This website was coded by <strong>Camelia Simion</strong>, and is
-        <a href="https://github.com/simcamelia/dictionary/" target="_blank" rel="noopener" class="underline text-indigo-600 dark:text-indigo-400">open-sourced</a>,
-        hosted on <a href="https://dictionarycs.netlify.app/" target="_blank" rel="noopener" class="underline text-indigo-600 dark:text-indigo-400">Netlify</a>.
-      </p>
-    </div>
-  </footer>
-
-  <!-- JS -->
-  <script>
-    const $ = (q) => document.querySelector(q);
-    const statusEl = $('#status');
-    const cardEl = $('#card');
-    const wordEl = $('#word');
-    const phoneticEl = $('#phonetic');
-    const meaningsEl = $('#meanings');
-    const synonymsWrapEl = $('#synonymsWrap');
-    const synonymsEl = $('#synonyms');
-    const playBtn = $('#playBtn');
-    const themeBtn = $('#themeToggle');
-    const themeIcon = $('#themeIcon');
-    document.getElementById('year').textContent = new Date().getFullYear();
-
-    // 2) Toggle and persist theme
-    function setTheme(mode){
-      const root = document.documentElement;
-      if (mode === 'dark') root.classList.add('dark'); else root.classList.remove('dark');
-      localStorage.setItem('theme', mode);
-      themeIcon.textContent = mode === 'dark' ? '☀️' : '🌙';
-      themeBtn.title = mode === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
-    }
-    // initialize icon based on current class
-    setTheme(document.documentElement.classList.contains('dark') ? 'dark' : 'light');
-
-    themeBtn.addEventListener('click', () => {
-      const isDark = document.documentElement.classList.contains('dark');
-      setTheme(isDark ? 'light' : 'dark');
-    });
-
-    let audioUrl = null;
-
-    function showStatus(msg, type='info') {
-      statusEl.classList.remove('hidden');
-      statusEl.className = 'rounded-xl border bg-white p-4 soft-shadow dark:bg-gray-900 dark:border-gray-800';
-      if (type === 'error') {
-        statusEl.classList.add('border-rose-300', 'bg-rose-50', 'dark:bg-rose-950/30', 'dark:border-rose-900');
-      } else if (type === 'loading') {
-        statusEl.classList.add('border-indigo-300', 'bg-indigo-50', 'dark:bg-indigo-950/30', 'dark:border-indigo-900');
-      } else {
-        statusEl.classList.add('border-emerald-300', 'bg-emerald-50', 'dark:bg-emerald-950/30', 'dark:border-emerald-900');
-      }
-      statusEl.textContent = msg;
-    }
-    function clearStatus(){ statusEl.classList.add('hidden'); statusEl.textContent=''; }
-
-    function renderDefinitions(entry){
-      wordEl.textContent = entry.word || '';
-      const phon = (entry.phonetic || (entry.phonetics||[]).find(p=>p.text)?.text || '').trim();
-      phoneticEl.textContent = phon;
-
-      audioUrl = null;
-      const phonAudio = (entry.phonetics || []).find(p => p.audio && p.audio.trim().length > 0);
-      if (phonAudio) { audioUrl = phonAudio.audio; playBtn.classList.remove('hidden'); }
-      else { playBtn.classList.add('hidden'); }
-
-      meaningsEl.innerHTML = '';
-      (entry.meanings || []).forEach(m => {
-        const box = document.createElement('section');
-        box.className = 'border rounded-xl p-4 dark:border-gray-800';
-        const pos = m.partOfSpeech ? `<span class="text-xs px-2 py-0.5 rounded-full bg-gray-100 border dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200">${m.partOfSpeech}</span>` : '';
-        const defs = (m.definitions || []).slice(0,5).map(d => {
-          const ex = d.example ? `<div class="text-gray-600 dark:text-gray-300 mt-1">💡 <em>${escapeHtml(d.example)}</em></div>` : '';
-          return `<li class="mb-2 leading-relaxed"><span class="font-medium">${escapeHtml(d.definition)}</span>${ex}</li>`;
-        }).join('');
-        box.innerHTML = `
-          <div class="flex items-center justify-between mb-2">${pos}</div>
-          <ol class="list-decimal pl-5">${defs || '<li class="text-gray-600 dark:text-gray-300">No definitions provided.</li>'}</ol>
-        `;
-        meaningsEl.appendChild(box);
-      });
-
-      const synSet = new Set();
-      (entry.meanings || []).forEach(m => (m.synonyms || []).forEach(s => synSet.add(s)));
-      synonymsEl.innerHTML = '';
-      if (synSet.size) {
-        synSet.forEach(s => {
-          const btn = document.createElement('button');
-          btn.className = 'px-2 py-1 rounded-lg border hover:bg-gray-50 dark:hover:bg-gray-800 dark:border-gray-700';
-          btn.textContent = s;
-          btn.addEventListener('click', () => search(s));
-          synonymsEl.appendChild(btn);
-        });
-        synonymsWrapEl.classList.remove('hidden');
-      } else {
-        synonymsWrapEl.classList.add('hidden');
-      }
-    }
-
-    function escapeHtml(s=''){
-      return s.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
-    }
-
-    async function search(term){
-      const q = term?.trim() || $('#query').value.trim();
-      if (!q) return;
-      showStatus('Looking up “‘'+ q +'’”…', 'loading');
-      cardEl.classList.add('hidden');
-
-      try {
-        const res = await fetch('https://api.dictionaryapi.dev/api/v2/entries/en/' + encodeURIComponent(q));
-        if (!res.ok) {
-          showStatus('No definitions found for “' + q + '”. Try another word.', 'error');
-          return;
-        }
-        const json = await res.json();
-        const entry = Array.isArray(json) ? json[0] : json;
-        clearStatus();
-        renderDefinitions(entry);
-        cardEl.classList.remove('hidden');
-        cardEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      } catch (e) {
-        showStatus('Something went wrong. Please try again.', 'error');
-      }
-    }
-
-    document.getElementById('searchForm').addEventListener('submit', (e) => {
-      e.preventDefault();
-      search();
-    });
-    document.querySelectorAll('.suggest').forEach(btn => btn.addEventListener('click', () => {
-      $('#query').value = btn.textContent.trim(); search();
-    }));
-    playBtn.addEventListener('click', () => {
-      if (!audioUrl) return;
-      const a = new Audio(audioUrl);
-      a.play().catch(()=>{});
-    });
-
-    window.addEventListener('DOMContentLoaded', () => {
-      const q = new URLSearchParams(location.search).get('q');
-      if (q) { $('#query').value = q; search(); }
-      else { $('#query').value = 'sunset'; search(); }
-    });
-  </script>
-</body>
+    <!-- CRA injects compiled scripts here -->
+  </body>
 </html>
