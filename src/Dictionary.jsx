@@ -8,10 +8,10 @@ export default function Dictionary() {
   const [definition, setDefinition] = useState(null);
   const [imageUrl, setImageUrl] = useState("");
 
-  // ✅ CRA reads env vars from process.env and they MUST start with REACT_APP_
+  // CRA env var (must exist in Netlify and/or .env.local)
   const PIXABAY_KEY = process.env.REACT_APP_PIXABAY_KEY;
 
-  // helpful diagnostics in the live console
+  // Diagnostics (you can remove these later)
   console.log("[Pixabay] key present?", Boolean(PIXABAY_KEY));
   console.log("[Pixabay] Using Dictionary.jsx");
 
@@ -25,16 +25,19 @@ export default function Dictionary() {
     try {
       // Dictionary API
       const dictRes = await fetch(
-        `https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word)}`
+        `https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(
+          word
+        )}`
       );
       if (!dictRes.ok) throw new Error(`Dictionary HTTP ${dictRes.status}`);
       const dictJson = await dictRes.json();
       if (!Array.isArray(dictJson) || !dictJson[0]) {
         throw new Error("No definition found.");
       }
-      setDefinition(dictJson[0]);
+      const entry = dictJson[0];
+      setDefinition(entry);
 
-      // Pixabay
+      // Pixabay API
       if (!PIXABAY_KEY) {
         console.warn("Missing REACT_APP_PIXABAY_KEY in build.");
       } else {
@@ -45,8 +48,8 @@ export default function Dictionary() {
         const pixRes = await fetch(url);
         if (!pixRes.ok) throw new Error(`Pixabay HTTP ${pixRes.status}`);
         const pixJson = await pixRes.json();
-
         console.log("[Pixabay] hits:", pixJson?.hits?.length, pixJson);
+
         const first = pixJson?.hits?.[0]?.webformatURL;
         setImageUrl(first || "");
       }
@@ -57,6 +60,10 @@ export default function Dictionary() {
       setLoading(false);
     }
   }
+
+  // Safely pick an audio URL if any phonetic entry provides one
+  const audioUrl =
+    definition?.phonetics?.find((p) => p?.audio)?.audio || "";
 
   return (
     <div className="dictionary-container">
@@ -91,6 +98,27 @@ export default function Dictionary() {
                   {definition.meanings[0].definitions[0].definition}
                 </p>
               )}
-              {definition.phonetics?.[0]?.audio && (
+              {audioUrl && (
                 <audio controls className="audio">
-                  <source sr
+                  <source src={audioUrl} type="audio/mpeg" />
+                </audio>
+              )}
+            </>
+          ) : (
+            <div className="placeholder">Search a word to see its meaning</div>
+          )}
+        </div>
+
+        <div className="image-card">
+          {imageUrl ? (
+            <img src={imageUrl} alt={word} className="word-image" />
+          ) : (
+            <div className="placeholder">
+              {loading ? "Fetching image..." : "No image yet — search a word"}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
