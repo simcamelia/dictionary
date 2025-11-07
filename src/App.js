@@ -1,5 +1,5 @@
 import React from "react";
-import Dictionary from "./Dictionary";
+import Dictionary from "./Dictionary.jsx";
 
 function App() {
   return (
