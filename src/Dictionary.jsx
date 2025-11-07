@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./Dictionary.css";
 
 export default function Dictionary() {
@@ -6,9 +6,29 @@ export default function Dictionary() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [entry, setEntry] = useState(null);
-  const [images, setImages] = useState([]);      // <-- gallery
+  const [images, setImages] = useState([]);
   const [imgError, setImgError] = useState(false);
 
+  // --- THEME: load -> apply -> persist ---
+  const getInitialTheme = () => {
+    const saved = localStorage.getItem("theme");
+    if (saved === "light" || saved === "dark") return saved;
+    return window.matchMedia &&
+      window.matchMedia("(prefers-color-scheme: dark)").matches
+      ? "dark"
+      : "light";
+  };
+  const [theme, setTheme] = useState(getInitialTheme);
+
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+    localStorage.setItem("theme", theme);
+  }, [theme]);
+
+  const toggleTheme = () =>
+    setTheme((t) => (t === "dark" ? "light" : "dark"));
+
+  // --- Pixabay key (CRA env) ---
   const PIXABAY_KEY = process.env.REACT_APP_PIXABAY_KEY;
 
   async function handleSearch(e) {
@@ -20,7 +40,7 @@ export default function Dictionary() {
     setImgError(false);
 
     try {
-      // === Dictionary API ===
+      // Dictionary API
       const dictRes = await fetch(
         `https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(
           word
@@ -34,7 +54,7 @@ export default function Dictionary() {
       const firstEntry = dictJson[0];
       setEntry(firstEntry);
 
-      // === Pixabay API (up to 6 images) ===
+      // Pixabay API (gallery)
       if (PIXABAY_KEY) {
         const url = `https://pixabay.com/api/?key=${PIXABAY_KEY}&q=${encodeURIComponent(
           word
@@ -71,12 +91,27 @@ export default function Dictionary() {
 
   return (
     <div className="dictionary-container">
-      <h1 className="title">
-        <span className="title-icon" role="img" aria-label="rainbow">
-          🌈
-        </span>
-        Dictionary
-      </h1>
+      {/* Fixed background layer */}
+      <div className="page-bg" aria-hidden="true" />
+
+      <header className="topbar">
+        <h1 className="title">
+          <span className="title-icon" role="img" aria-label="rainbow">
+            🌈
+          </span>
+          Dictionary
+        </h1>
+        <button
+          className="theme-toggle"
+          type="button"
+          onClick={toggleTheme}
+          aria-label="Toggle light/dark theme"
+          title="Toggle light/dark theme"
+        >
+          {theme === "dark" ? "☀️ Light" : "🌙 Dark"}
+        </button>
+      </header>
+
       <p className="subtitle">Meanings, examples & images for any word</p>
 
       <form onSubmit={handleSearch} className="search-form">
