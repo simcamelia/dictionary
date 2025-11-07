@@ -6,7 +6,7 @@ export default function Dictionary() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [entry, setEntry] = useState(null);
-  const [imageUrl, setImageUrl] = useState("");
+  const [images, setImages] = useState([]);      // <-- gallery
   const [imgError, setImgError] = useState(false);
 
   const PIXABAY_KEY = process.env.REACT_APP_PIXABAY_KEY;
@@ -16,13 +16,15 @@ export default function Dictionary() {
     setError("");
     setLoading(true);
     setEntry(null);
-    setImageUrl("");
+    setImages([]);
     setImgError(false);
 
     try {
-      // Dictionary API
+      // === Dictionary API ===
       const dictRes = await fetch(
-        `https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word)}`
+        `https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(
+          word
+        )}`
       );
       if (!dictRes.ok) throw new Error(`Dictionary HTTP ${dictRes.status}`);
       const dictJson = await dictRes.json();
@@ -32,20 +34,20 @@ export default function Dictionary() {
       const firstEntry = dictJson[0];
       setEntry(firstEntry);
 
-      // Pixabay API
+      // === Pixabay API (up to 6 images) ===
       if (PIXABAY_KEY) {
         const url = `https://pixabay.com/api/?key=${PIXABAY_KEY}&q=${encodeURIComponent(
           word
-        )}&image_type=photo&per_page=5&safesearch=true`;
+        )}&image_type=photo&per_page=12&safesearch=true`;
         const pixRes = await fetch(url);
         if (pixRes.ok) {
           const pixJson = await pixRes.json();
-          const hit =
-            (pixJson?.hits || []).find(
-              (h) => typeof h?.webformatURL === "string" && /^(http|https):/.test(h.webformatURL)
-            ) || pixJson?.hits?.[0];
-          const firstUrl = hit?.webformatURL || hit?.largeImageURL || hit?.previewURL || "";
-          setImageUrl(firstUrl ? firstUrl.replace(/^http:/, "https:") : "");
+          const hits = (pixJson?.hits || [])
+            .map((h) => h?.webformatURL || h?.largeImageURL || h?.previewURL)
+            .filter(Boolean)
+            .slice(0, 6)
+            .map((u) => u.replace(/^http:/, "https:"));
+          setImages(hits);
         }
       }
     } catch (err) {
@@ -62,12 +64,20 @@ export default function Dictionary() {
     entry?.phonetics?.[0]?.text ||
     "";
 
+  const totalMeanings = entry?.meanings?.reduce(
+    (sum, m) => sum + (m?.definitions?.length || 0),
+    0
+  );
+
   return (
     <div className="dictionary-container">
       <h1 className="title">
-        <span className="title-icon" role="img" aria-label="rainbow">🌈</span>
+        <span className="title-icon" role="img" aria-label="rainbow">
+          🌈
+        </span>
         Dictionary
       </h1>
+      <p className="subtitle">Meanings, examples & images for any word</p>
 
       <form onSubmit={handleSearch} className="search-form">
         <input
@@ -87,10 +97,27 @@ export default function Dictionary() {
 
       <div className="results">
         <div className="definition-card">
-          {entry ? (
+          {loading && !entry ? (
+            <div className="skeleton">
+              <div className="sk-line sk-title" />
+              <div className="sk-line" />
+              <div className="sk-line" />
+              <div className="sk-line short" />
+            </div>
+          ) : entry ? (
             <>
-              <h2 className="word">{entry.word}</h2>
-              {phoneticText && <div className="phonetic">{phoneticText}</div>}
+              <div className="header-row">
+                <div>
+                  <h2 className="word">{entry.word}</h2>
+                  {phoneticText && (
+                    <div className="phonetic">{phoneticText}</div>
+                  )}
+                </div>
+                {typeof totalMeanings === "number" && totalMeanings > 0 && (
+                  <span className="badge">{totalMeanings} definitions</span>
+                )}
+              </div>
+
               {audioUrl && (
                 <audio controls className="audio">
                   <source src={audioUrl} type="audio/mpeg" />
@@ -100,14 +127,18 @@ export default function Dictionary() {
               <div className="meanings">
                 {(entry.meanings || []).map((m, i) => (
                   <section key={i} className="meaning-block">
-                    {m.partOfSpeech ? <h3 className="pos">{m.partOfSpeech}</h3> : null}
+                    {m.partOfSpeech ? (
+                      <h3 className="pos chip">{m.partOfSpeech}</h3>
+                    ) : null}
 
                     <ol className="definitions-list">
                       {(m.definitions || []).map((d, j) => (
                         <li key={j} className="definition-item">
                           <div className="definition-text">{d?.definition}</div>
 
-                          {d?.example ? <div className="example">“{d.example}”</div> : null}
+                          {d?.example ? (
+                            <div className="example">“{d.example}”</div>
+                          ) : null}
 
                           {(d?.synonyms?.length || d?.antonyms?.length) ? (
                             <div className="sa-row">
@@ -133,15 +164,6 @@ export default function Dictionary() {
                   </section>
                 ))}
               </div>
-
-              {(entry.sourceUrls?.length || entry.license) ? (
-                <div className="source">
-                  {entry.sourceUrls?.[0] ? (
-                    <a href={entry.sourceUrls[0]} target="_blank" rel="noreferrer">Source</a>
-                  ) : null}
-                  {entry.license?.name ? <span className="license"> · {entry.license.name}</span> : null}
-                </div>
-              ) : null}
             </>
           ) : (
             <div className="placeholder">Search a word to see its meaning</div>
@@ -149,17 +171,34 @@ export default function Dictionary() {
         </div>
 
         <div className="image-card">
-          {imageUrl && !imgError ? (
-            <img
-              src={imageUrl}
-              alt={word}
-              className="word-image"
-              onError={() => setImgError(true)}
-            />
+          {loading && images.length === 0 ? (
+            <div className="gallery skeleton">
+              <div className="sk-tile" />
+              <div className="sk-tile" />
+              <div className="sk-tile" />
+            </div>
+          ) : images.length ? (
+            <div className="gallery">
+              {images.map((src, i) => (
+                <a
+                  className="img-wrap"
+                  key={i}
+                  href={src}
+                  target="_blank"
+                  rel="noreferrer"
+                  onError={() => setImgError(true)}
+                >
+                  <img src={src} alt={`${word} ${i + 1}`} />
+                </a>
+              ))}
+            </div>
           ) : (
             <div className="placeholder">
               {loading ? "Fetching image..." : "No image yet — search a word"}
             </div>
+          )}
+          {imgError && (
+            <div className="error small">Some images failed to load.</div>
           )}
         </div>
       </div>
