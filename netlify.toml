@@ -1,6 +1,9 @@
 [build]
-  command = "node -e \"console.log('REACT_APP_PIXABAY_KEY length:', (process.env.REACT_APP_PIXABAY_KEY||'').length)\" && npm run build"
+  command = "npm run build"
   publish = "build"
+
+[build.environment]
+  REACT_APP_PIXABAY_KEY = "53139576-2f224fdf737b500933b59b147"
 
 [[redirects]]
   from = "/*"
